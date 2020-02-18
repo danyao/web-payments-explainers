@@ -65,10 +65,10 @@ payer identity needed to identify the financial account backing this payment
 handler.
 1. __Enrolled__: the payment handler installed in the current browser has been
 linked to a financial account. There may be two slight variations to this state:
-  a. __Weak Enrolled__: this payment handler has knowledge of a payer identity (
+   1. __Weak Enrolled__: this payment handler has knowledge of a payer identity (
      e.g. an email address), but cannot prove that it has been authorized by the
      account owner to act on behalf of the account.
-  b. __Strong Enrolled__: this payment handler can present proof (e.g.
+   1. __Strong Enrolled__: this payment handler can present proof (e.g.
      side-channel or cryptographic proof) that the account owner has approved
      the association of this payment handler on this device to the financial
      account.
@@ -159,10 +159,13 @@ function onUserSignin(userId) {
 }
 ```
 
-Note that although the web signin flow can persists the user ID using cookies,
+__NOTE:__ Although the web signin flow can persists the user ID using cookies,
 this path is not recommended because cookies are not accessible by service
 workers, so would not be usable for the service worker to respond to
 `hasEnrolledInstrument()` for subsequent visits.
+
+__NOTE:__ The WebAuthn credential cannot be retrieved from the service
+worker context.
 
 __Returning user on the same browser:__
 
@@ -171,11 +174,9 @@ __Returning user on the same browser:__
 1. Merchant calls `request.hasEnrolledInstrument()`. Since a payment handler is
    installed, the browser triggers `canmakepayment` event (to be renamed to
    `hasenrolledinstrument` event) in the payment handler's service worker.
-  1. The service worker queries IndexedDB and finds a previously saved user ID,
-     so it responds `true` to `canmakepayment` event.
-  1. 'hasEnrolledInstrument()` resolves to true.
-  > Note that the WebAuthn credential cannot be retrieved from the service
-  > worker context.
+   1. The service worker queries IndexedDB and finds a previously saved user ID,
+      so it responds `true` to `canmakepayment` event.
+   1. 'hasEnrolledInstrument()` resolves to true.
 1. User interacts with merchant website, which triggers `request.show()`.
 1. Browser presents the installed payment handler as a payment option to the
    user (or skips directly to the payment handler if it is the only payment
