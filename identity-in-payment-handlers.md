@@ -28,7 +28,8 @@ integrates with the browser via the [Payment Handler API][ph-api]. The rest of
 this document uses "payment app" and "payment handler" interchangeably.
 
 The role of a payment app is essentially that of a wallet, which has four core
-responsibilities during a payment flow:
+responsibilities during a payment flow. Depending on the payment method, some
+of these may not be required in all cases.
 
 1. __Provide a user interface__ for the user to choose an instrument from within
 the wallet (where there may be only one) to pay for the current transaction.
@@ -82,7 +83,7 @@ The [Payment Request API][pr-api] provides a `hasEnrolledInstrument()` method
 that the merchant can used to query if a payment handler is in the enrolled
 state so it can complete the payment with low user friction. The intuition here
 is that a merchant may prefer to only offer a particular payment option if the
-associated the payment handler can guarantee a good user experience.
+associated the payment handler is primed to offer a good user experience.
 
 The current [Payment Handler API][ph-api] design only allows a payment handler
 to respond to `hasEnrolledInstrument()` using an event handler registered in the
@@ -159,7 +160,7 @@ function onUserSignin(userId) {
 }
 ```
 
-__NOTE:__ Although the web signin flow can persists the user ID using cookies,
+__NOTE:__ Although the web signin flow can persist the user ID using cookies,
 this path is not recommended because cookies are not accessible by service
 workers, so would not be usable for the service worker to respond to
 `hasEnrolledInstrument()` for subsequent visits.
@@ -283,7 +284,7 @@ SRC user journey with the following key requirements:
   card number).
 * The default payment handler is linked to the user's SRC ID.
 
-These requirements are not fundamentally different from the general enrollment
+These requirements are very similar to the general enrollment
 flows described in this document and can be met with existing technology:
 
 1. When user enters an SRC ID inside the default payment handler for the first
