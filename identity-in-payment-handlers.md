@@ -10,7 +10,8 @@ to establish payer identity during a payment flow.
 
 __A note to readers:__
 Since I'm learning about web storage and privacy as I go, any feedback is
-highly appreciated. 🙂🙏🏻 The end goal of this document is to either confirm that
+highly appreciated. 🙂🙏🏻 Please email me or file an issue in this repo.
+The end goal of this document is to either confirm that
 Payment Handler API has sufficient features to support the type of identity flow
 needed during web payments, or identify any missing features that we should add
 to the API.
