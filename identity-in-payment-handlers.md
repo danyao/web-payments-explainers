@@ -4,12 +4,9 @@ Author: danyao@chromium.org <br/>
 Status: draft <br/>
 Last updated: 2020-02-17
 
-
 This explainer aims to enumerate the technical solutions that are currently
 available to web applications that implement the [Payment Handler API][ph-api]
 to establish payer identity during a payment flow.
-
-[[TOC]]
 
 ## Background
 
@@ -84,10 +81,6 @@ to respond to `hasEnrolledInstrument()` using an event handler registered in the
 service worker and without opening any user interface. As a result, the only
 persistent storage that the service worker can leverage to store the enrolled
 user identity is [IndexedDB][indexed-db].
-
-### Trust Tokens
-
-TODO
 
 ## Enrollment Flows
 
