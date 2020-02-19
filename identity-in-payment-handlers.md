@@ -1,7 +1,7 @@
 # Payer Identity in Web-based Payment Handlers
 
 Author: danyao@chromium.org <br/>
-Status: draft <br/>
+Status: Draft <br/>
 Last updated: 2020-02-17
 
 This explainer attempts to enumerate the technical solutions that are currently
@@ -15,6 +15,9 @@ The end goal of this document is to either confirm that
 Payment Handler API has sufficient features to support the type of identity flow
 needed during web payments, or identify any missing features that we should add
 to the API.
+
+Discussion notes:
+- 2020-02-19 User recognition flow discussion with Mastercard, [minutes](https://www.w3.org/2020/02/19-apps-minutes.html)
 
 ## Background
 
@@ -35,7 +38,7 @@ of these may not be required in all cases.
 the wallet (where there may be only one) to pay for the current transaction.
 1. __Authenticate the user__ as the owner of the financial account represented
 by the wallet.
-1. __Obtain authorization__ from the user (who has been proven to be the account
+1. __Obtain confirmation__ from the user (who has been proven to be the account
 owner) to proceed with the payment.
 1. __Execute the payment__ or generate the necessary data for another entity
 (usually the merchant) to execute the payment.
@@ -55,7 +58,7 @@ A web-based payment handler is a [Service Worker][service-worker] that
 [registers][ph-set] the capability to handle payment requests with the browser.
 Its lifecycle includes the following stages:
 
-1. __Pre-installation__: the service worker is not yet installed in the browser.
+1. __Undiscovered__: the service worker is not yet installed in the browser.
 1. __Discovered__: the service worker has been identified as the default
 application in a [Payment Method Manifest][payment-manifest], possibly as part
 of a browser's Just-in-Time installation flow, but is not yet installed in the
@@ -74,8 +77,9 @@ linked to a financial account. There may be two slight variations to this state:
      the association of this payment handler on this device to the financial
      account.
 
-Achieving the Weak Enrolled state is the minimum requirement for a payment
-handler to able to play its role during a payment transaction.
+We anticipate that in most use cases, achieving the Weak Enrolled state is
+the minimum requirement for a payment handler to able to play its role
+during a payment transaction.
 
 ### hasEnrolledInstrument()
 
@@ -85,15 +89,28 @@ state so it can complete the payment with low user friction. The intuition here
 is that a merchant may prefer to only offer a particular payment option if the
 associated the payment handler is primed to offer a good user experience.
 
+A payment handler returns “true” when it has an enrolled instrument. Each
+payment method (whether proprietary or standardized) will define what having an
+enrolled instrument means, and specifically whether to return “true” for the weak
+enrolled state or the strong enrolled state.
+
+> Currently, if a browser is unable to solicit an answer from a payment handler
+> (e.g. because the payment handler is in the Undiscovered state, or if the user
+> is browsing in privacy mode, of if the user has disabled the ability for websites
+> to check `hasEnrolledInstrument`) in their browser settings, the behavior is
+> implementation specific. For example, [Safari returns "true"][applepay] on all
+> devices where ApplePay (a built-in payment handler) is supported, and Chrome
+> always returns "false".
+
 The current [Payment Handler API][ph-api] design only allows a payment handler
 to respond to `hasEnrolledInstrument()` using an event handler registered in the
 service worker and without opening any user interface. As a result, the only
 persistent storage that the service worker can leverage to store the enrolled
 user identity is [IndexedDB][indexed-db].
 
-## Enrollment Flows
+## Installation and Enrollment Flows
 
-### On-the-fly enrollment
+### On-the-fly Installation and Enrollment
 
 This flow can be implemented today using existing technology:
 
@@ -118,8 +135,9 @@ __First time, unrecognized user:__
 1. `https://payment-handler.example/ui` persists a user ID in IndexedDB. At this
    point, the payment handler is in "Weak Enrolled" state.
 1. (Optional) `https://payment-handler.example/ui` uses [WebAuthn][webauthn] to
-   register the current device to the user's account. At this point, the
-   payment handler is in "Strong Enrolled" state.
+   enroll an authenticator, which may be built-in to the current device, to a
+   user ID specified by `https://payment-handler.example/ui`.
+   At this point, the payment handler is in "Strong Enrolled" state.
 
 Here is an example sketch of how the web signin flow can persist the user ID
 using IndexedDB:
@@ -185,9 +203,9 @@ __Returning user on the same browser:__
 1. Payment handler receives `PaymentRequestEvent` and calls
    `event.openWindow('https://payment-handler.example/ui')` to open up a web
    signin flow.
-1. `https://payment-handler.example/ui` requests a WebAuthn assertion for the
-   user ID to verify that this is the same device the user has previously
-   enrolled.
+1. `https://payment-handler.example/ui` uses WebAuthn to verify that the user
+   still possesses the enrolled authenticator (which may be built-in to the 
+   current device).
 1. Browser prompts the user for an authorization gesture, which the user
    provides.
 1. `https://payment-handler.example/ui` verifies that this is the same device
@@ -232,13 +250,13 @@ self.addEventListener("canmakepayment", (evt) => {
 });
 ```
 
-### Explicit Enrollment on Payment Handler Origin
+### Manual Installation and Enrollment on Payment Handler Origin
 
 Current technology also allows a payment handler to enroll a user prior to the
 first checkout to avoid friction during checkout. This requires the user to
-visit the payment handler website explicitly.
+visit the payment handler website (origin) explicitly.
 
-__Explicit enrollment in payment handler origin:__
+__Manual installation in payment handler origin:__
 
 1. User visits `https://payment-handler.example` and signs in to an existing
    account using whatever method they have been using.
@@ -345,3 +363,4 @@ flow.
 [webauthn]: https://www.w3.org/TR/webauthn/
 [src-flow]: https://www.w3.org/2020/02/05-wpwg-minutes
 [payment-manager]: https://w3c.github.io/payment-handler/#paymentmanager-interface
+[applepay]: https://github.com/w3c/payment-request/pull/843#issuecomment-473108537
