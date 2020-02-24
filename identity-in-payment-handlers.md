@@ -1,6 +1,6 @@
 # Payer Identity in Web-based Payment Handlers
 
-Author: danyao@chromium.org <br/>
+Contributors: Danyao Wang (danyao@chromium.org), Ian Jacobs (ij@w3c.org) <br/>
 Status: Draft <br/>
 Last updated: 2020-02-17
 
