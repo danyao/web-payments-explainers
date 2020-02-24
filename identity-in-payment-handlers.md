@@ -81,6 +81,8 @@ We anticipate that in most use cases, achieving the Weak Enrolled state is
 the minimum requirement for a payment handler to able to play its role
 during a payment transaction.
 
+![Payment Handler Lifecycle](ph-states.png)
+
 ### hasEnrolledInstrument()
 
 The [Payment Request API][pr-api] provides a `hasEnrolledInstrument()` method
